@@ -8,7 +8,7 @@ def open_file(file_name):
     file_data = []
     with open(file_name,"r") as file:
         for rows in file:
-            file_data.append(rows) # Iterating through each row and appending it to the list.
+            file_data.append(rows.strip()) # Iterating through each row and appending it to the list.
         return file_data # Returns data and closes file due to with.
     return None # None is returned for an invalid file type.
 
