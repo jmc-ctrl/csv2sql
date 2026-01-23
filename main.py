@@ -12,6 +12,15 @@ def open_file(file_name):
         return file_data # Returns data and closes file due to with.
     return None # None is returned for an invalid file type.
 
+def preprocess_data(data):
+    """Splits data into 2D array, index 0 is headers, index 1 is the data for inserts."""
+    headers = data[0]
+    actual_data = data[0:] # All things in list > index 0.
+
+    return [[headers],[actual_data]]
+
+
+
 class InsertStatement:
     string(table_name)
     string(entities) 
@@ -32,6 +41,13 @@ class InsertStatement:
 
 
         data = modified_data # Overwriting original data with modified data.
+
     def create_statement(self):
         statement = f"INSERT INTO {table_name} {entities} VALUES {data};"
         return statement
+
+
+# Testing functionality.
+testing = preprocess_data(open_file("test_file.csv"))
+statement_data = InsertStatement("sample_table",testing[0],testing[1])
+print(statement_data.create_statement)
