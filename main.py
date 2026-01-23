@@ -20,10 +20,12 @@ def preprocess_data(data):
     return [[headers],[actual_data]]
 
 def write_sql_file(output_filename,data):
+    """Writes the output file. Arguments are filename and the cleaned data."""
     with open(output_filename,"w") as output:
         output.writelines(data) # Dumps all data to the file.
 
 class InsertStatement:
+    """Class to store structure and build the insert statement."""
     def __init__(self, table_name, entities, data):
         self.table_name = table_name
         self.entities = entities
@@ -32,6 +34,7 @@ class InsertStatement:
         self.format_values()
     
     def format_values(self):
+        """Formats values to be in (thing1,thing2...),(thing1,thing2...),(thing1,thing2...), etc format for insert."""
         modified_data = []
         for i, items in enumerate(self.data): # Switched to enumerated list.
             if i == len(self.data) - 1:  # Last item can't have ,
@@ -42,13 +45,14 @@ class InsertStatement:
         self.modified_data = modified_data  # Stored as instance variable part of class.
     
     def create_statement(self):
-        # Join all formatted data elements
+        """Join all formatted data elements"""
         values = ''.join(self.modified_data) # Variable to store inserts. Also changed to '' as per SQL syntax instead of "".
-        statement = f"INSERT INTO {self.table_name} {self.entities} VALUES {values};"
+        statement = f"INSERT INTO {self.table_name} {self.entities} VALUES {values};" # Final sql statement.
         return statement
 
 
 if __name__ == "__main__":
+    """Uses sys.argv arguments to build an insert statement."""
     try:
         raw_data = preprocess_data(open_file(str(sys.argv[1])))
         statement_data = InsertStatement(str(sys.argv[2]),raw_data[0],raw_data[1])
