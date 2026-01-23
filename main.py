@@ -19,7 +19,9 @@ def preprocess_data(data):
 
     return [[headers],[actual_data]]
 
-
+def write_sql_file(output_filename,data):
+    with open(output_filename,"w") as output:
+        output.writelines(data) # Dumps all data to the file.
 
 class InsertStatement:
     def __init__(self, table_name, entities, data):
@@ -49,3 +51,7 @@ class InsertStatement:
 testing = preprocess_data(open_file("test_file.csv"))
 statement_data = InsertStatement("sample_table", testing[0], testing[1])
 print(statement_data.create_statement())
+
+
+# Testing writing
+write_sql_file("test.sql",statement_data.create_statement())
