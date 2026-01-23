@@ -1,55 +1,53 @@
-# Prerequisites
-*.d
+# Byte-compiled files
+__pycache__/
+*.py[cod]
 
-# Object files
-*.o
-*.ko
-*.obj
-*.elf
+# Distribution / packaging
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+*.egg-info/
+*.egg
 
-# Linker output
-*.ilk
-*.map
-*.exp
+# Virtual environment directories
+.venv/
+venv/
 
-# Precompiled Headers
-*.gch
-*.pch
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
 
-# Libraries
-*.lib
-*.a
-*.la
-*.lo
+# mypy
+.mypy_cache/
 
-# Shared objects (inc. Windows DLLs)
-*.dll
+# Python linting
+.pylint.d/
+
+# Coverage reports
+.coverage
+coverage.xml
+.htmlcov/
+*.cover
+
+# IDE and editors
+.vscode/
+.idea/
+*.swp
+*~ 
+
+# Pytest
+.cache/
+pytest_cache/
+
+# C extensions
 *.so
-*.so.*
-*.dylib
 
-# Executables
-*.exe
-*.out
-*.app
-*.i*86
-*.x86_64
-*.hex
+# Translations
+*.mo
+*.pot
 
-# Debug files
-*.dSYM/
-*.su
-*.idb
-*.pdb
-
-# Kernel Module Compile Results
-*.mod*
-*.cmd
-.tmp_versions/
-modules.order
-Module.symvers
-Mkfile.old
-dkms.conf
-
-# debug information files
-*.dwo
+# Test results
+nosetests.xml
+test_*.xml
