@@ -50,9 +50,9 @@ class InsertStatement:
 
 if __name__ == "__main__":
     try:
-        raw_data = preprocess_data(open_file(sys.argv(0)))
-        statement_data = InsertStatement(sys.argv[1],raw_data[0],raw_data[1])
-        write_sql_file(sys.argv[2],statement_data.create_statement())
+        raw_data = preprocess_data(open_file(str(sys.argv[0])))
+        statement_data = InsertStatement(str(sys.argv[1]),raw_data[0],raw_data[1])
+        write_sql_file(str(sys.argv[2]),statement_data.create_statement())
     except Exception as e:
         print(f"An error occured: {e}.")
         print("Arguments: python csv2sql.py SOURCE_FILENAME TABLE_NAME OUTPUT_FILENAME")
