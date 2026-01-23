@@ -24,6 +24,8 @@ char readFile (char filename[]){
 
 int main(){
 
-    
+    const char testFileName[] = "test_file.csv";
+    char fileData = readFile( "test_file.csv");
+    printf("%d",fileData);
     return 0;
 }
