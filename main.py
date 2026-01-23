@@ -35,13 +35,13 @@ class InsertStatement:
             if i == len(self.data) - 1:  # Last item can't have ,
                 modified_data.append(f"({items})")
             else:
-                modified_data.append(f"({items}),\n")
+                modified_data.append(f"({items}),") 
         
         self.modified_data = modified_data  # Stored as instance variable part of class.
     
     def create_statement(self):
         # Join all formatted data elements
-        values = ''.join(self.modified_data) # Variable to store inserts.
+        values = ''.join(self.modified_data) # Variable to store inserts. Also changed to '' as per SQL syntax instead of "".
         statement = f"INSERT INTO {self.table_name} {self.entities} VALUES {values};"
         return statement
 
