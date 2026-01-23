@@ -47,11 +47,12 @@ class InsertStatement:
         statement = f"INSERT INTO {self.table_name} {self.entities} VALUES {values};"
         return statement
 
-# Testing functionality.
-testing = preprocess_data(open_file("test_file.csv"))
-statement_data = InsertStatement("sample_table", testing[0], testing[1])
-print(statement_data.create_statement())
 
-
-# Testing writing
-write_sql_file("test.sql",statement_data.create_statement())
+if __name__ == "__main__":
+    try:
+        raw_data = preprocess_data(open_file(sys.argv(0)))
+        statement_data = InsertStatement(sys.argv[1],raw_data[0],raw_data[1])
+        write_sql_file(sys.argv[2],statement_data.create_statement())
+    except Exception as e:
+        print(f"An error occured: {e}.")
+        print("Arguments: python csv2sql.py SOURCE_FILENAME TABLE_NAME OUTPUT_FILENAME")
