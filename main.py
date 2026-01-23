@@ -6,7 +6,7 @@ def open_file(file_name):
     """Opens file, stores whole file in variable.
     Either returns the data from the file, or None if invalid filename."""
     file_data = []
-    with open(file_name,"r"):
+    with open(file_name,"r") as file:
         for rows in file:
             file_data.append(rows) # Iterating through each row and appending it to the list.
         return file_data # Returns data and closes file due to with.
@@ -22,19 +22,11 @@ def preprocess_data(data):
 
 
 class InsertStatement:
-    string(table_name)
-    string(entities) 
-    list(data) 
 
-    def __init__(self, table_name, entities, data):
-        self.table_name = table_name
-        self.entities = entities
-        self.data = format_values(data)
-
-    def format_values(data):
+    def format_values(self):
         modified_data = []
-        for items in data:
-            if items == data[-1]:
+        for items in self.data:
+            if items == self.data[-1]:
                 modified_data.append(f"({items})") # No , allowed for last values.
             else:
                 modified_data.append(f"({items}),\n") # Otherwise allow the , for multiple inserts.
@@ -46,8 +38,16 @@ class InsertStatement:
         statement = f"INSERT INTO {table_name} {entities} VALUES {data};"
         return statement
 
+    def __init__(self, table_name, entities, data):
+        self.table_name = table_name
+        self.entities = entities
+        self.data = data
+        self.format_values()
+
+    
+
 
 # Testing functionality.
 testing = preprocess_data(open_file("test_file.csv"))
 statement_data = InsertStatement("sample_table",testing[0],testing[1])
-print(statement_data.create_statement)
+print(str(statement_data.create_statement))
