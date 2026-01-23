@@ -15,7 +15,7 @@ def open_file(file_name):
 def preprocess_data(data):
     """Splits data into 2D array, index 0 is headers, index 1 is the data for inserts."""
     headers = data[0]
-    actual_data = data[0:] # All things in list > index 0.
+    actual_data = data[1:] # All things in list > index 0.
 
     return [[headers],[actual_data]]
 
