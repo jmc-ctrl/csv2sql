@@ -22,32 +22,30 @@ def preprocess_data(data):
 
 
 class InsertStatement:
-
-    def format_values(self):
-        modified_data = []
-        for items in self.data:
-            if items == self.data[-1]:
-                modified_data.append(f"({items})") # No , allowed for last values.
-            else:
-                modified_data.append(f"({items}),\n") # Otherwise allow the , for multiple inserts.
-
-
-        data = modified_data # Overwriting original data with modified data.
-
-    def create_statement(self):
-        statement = f"INSERT INTO {table_name} {entities} VALUES {data};"
-        return statement
-
     def __init__(self, table_name, entities, data):
         self.table_name = table_name
         self.entities = entities
         self.data = data
+        self.modified_data = [] # Has to be here to work.
         self.format_values()
-
     
-
+    def format_values(self):
+        modified_data = []
+        for i, items in enumerate(self.data): # Switched to enumerated list.
+            if i == len(self.data) - 1:  # Last item can't have ,
+                modified_data.append(f"({items})")
+            else:
+                modified_data.append(f"({items}),\n")
+        
+        self.modified_data = modified_data  # Stored as instance variable part of class.
+    
+    def create_statement(self):
+        # Join all formatted data elements
+        values = ''.join(self.modified_data) # Variable to store inserts.
+        statement = f"INSERT INTO {self.table_name} {self.entities} VALUES {values};"
+        return statement
 
 # Testing functionality.
 testing = preprocess_data(open_file("test_file.csv"))
-statement_data = InsertStatement("sample_table",testing[0],testing[1])
-print(str(statement_data.create_statement))
+statement_data = InsertStatement("sample_table", testing[0], testing[1])
+print(statement_data.create_statement())
