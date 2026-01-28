@@ -1,5 +1,6 @@
 import sys # For arguments
-import re # Regex
+import re
+from dataclasses import replace
 
 
 def load_data(file_name):
@@ -19,29 +20,6 @@ def load_data(file_name):
     for entry in file_data:
         cleaned_data.append(entry.split(","))
     return headers, cleaned_data
-
-head, data = load_data("test_file.csv")
-
-# Attempt at cleaning data.
-'''for items,item in data:
-    try: # Converting any single number to an int. If it can be cast to int, its an int. Otherwise exception is triggered and its left as varchar.
-        if int(item) and float(item):
-            #items[item] = float(item)
-            changed_item = float(item)
-
-        elif int(item):
-            #items[item] = int(item)
-            changed_item = int(item)
-
-        items[item] = changed_item
-        new_items = items
-        data.remove(items)
-        data.append(new_items)
-
-    except TypeError:
-        pass # TLDR, leaves as string.'''
-
-print(data)
 
 def generate_insert(table,headers,data):
     '''columns_string = str
@@ -97,10 +75,14 @@ def print_to_file(filename,final_data):
                 file.write(tuples+",")
                 file.write("\n")
 
-    pass
-final_array = generate_insert("test",head,data)
-print_to_file("test_output.sql",final_array)
+if __name__ == "__main__":
+    """Uses sys.argv arguments to build an insert statement."""
+    try:
+        head, data = load_data(sys.argv[1])
+        final_array = generate_insert(sys.argv[2],head,data)
+        print_to_file(sys.argv[3],final_array)
+    except Exception as e:
+        print(f"An error occured: {e}.")
+        print("Arguments: python csv2sql.py SOURCE_FILENAME TABLE_NAME OUTPUT_FILENAME")
 
 
-
-pass
