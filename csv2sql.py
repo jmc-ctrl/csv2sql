@@ -1,6 +1,6 @@
-import sys # For arguments
-import re
-from dateutil import parser
+import sys # For arguments.
+import re # Regex.
+from dateutil import parser # For date format conversions.
 
 
 def load_data(file_name):
@@ -22,25 +22,17 @@ def load_data(file_name):
     return headers, cleaned_data
 
 def generate_insert(table,headers,data):
-    '''columns_string = str
-    headers = headers.split(",")
-    for column in headers:
-        columns_string = column
-        if not column == headers[-1]:
-            columns_string = columns_string,","'''
-    columns_string = str(headers)
-    final_array = []
-    beginning_string = (f"INSERT INTO {table} ({columns_string}) VALUES")
-    final_array.append(beginning_string)
+    """Generates insert statement. Returns inserts in uncleaned format."""
+    inserts = [] # List to store the inserts.
+    beginning_string = (f"INSERT INTO {table} ({str(headers)}) VALUES")
+    inserts.append(beginning_string)
     values_to_insert = []
     for items in data:
-        values_to_insert.append(str(items))
+        values_to_insert.append(str(items)) # Casts list to string.
     for items in values_to_insert:
-        items = items.strip("[]")
-        '''print(f"({str(items)})", end ="")
-        print(",")'''
-        final_array.append(f"({str(items)})")
-    return final_array
+        items = items.strip("[]") # Removing python list [] which will be printed otherwise around the items.
+        inserts.append(f"({str(items)})")
+    return inserts
 
 def fix_int_float(dataset):
     """Finds potential ints and float datatypes in the insert statement, and changes it from '10' to 10, or '6.7777' to 6.7777 to make sure it'll work right with the schema."""
@@ -74,6 +66,7 @@ def fix_int_float(dataset):
     return dataset # Returns cleaned data.
 
 def fix_dates(dataset):
+    """Converts dates to YYYY-MM-DD ISO 8601 format."""
     def convert_non_iso_dates(text):
         def convert_match(match):
             try:
@@ -82,37 +75,43 @@ def fix_dates(dataset):
             except ValueError:
                 return match.group(0)
 
-        pattern = re.compile(r'\b(\d{1,2}[/-]\d{1,2}[/-]\d{4}|\d{1,2} [A-Za-z]{3} \d{4})\b')
+        pattern = re.compile(r'\b(\d{1,2}[/-]\d{1,2}[/-]\d{4}|\d{1,2} [A-Za-z]{3} \d{4})\b') # Regex for various date formats.
         converted_text = pattern.sub(convert_match, text)
         return converted_text
     index_num = 0
-    for lines in dataset:
+    for lines in dataset: # Iterating through dataset to change any date values.
         dataset[index_num] = convert_non_iso_dates(lines)
         index_num += 1
     return dataset
 
-#final_array = fix_int_float(generate_insert("test",head,data))
 def print_to_file(filename,final_data):
+    """Writes all of the insert statements to a file.
+    Arguments:
+        filename: filename
+        final_data: Final dataset to write to file."""
     with open(filename,"w") as file:
         for tuples in final_data:
             if tuples == final_data[0]: # For printing headers only.
                 file.write(tuples)
                 file.write("\n")
             elif tuples == final_data[-1]:
-                file.write(tuples+";")
+                file.write(tuples+";") # Prints ; at end.
             else:
-                file.write(tuples+",")
+                file.write(tuples+",") # Otherwise, prints comma and starts a new line.
                 file.write("\n")
 
 if __name__ == "__main__":
-    """Uses sys.argv arguments to build an insert statement."""
+    """Uses sys.argv arguments to build an insert statement.
+    Use format source_filename table_name output_filename"""
     try:
+        # Various calls to different functions to run parts of the program.
         head, data = load_data(sys.argv[1])
         inserted_array = generate_insert(sys.argv[2],head,data)
         fixed_int_float_array = fix_int_float(inserted_array)
         final_array = fix_dates(fixed_int_float_array)
         print_to_file(sys.argv[3],final_array)
     except Exception as e:
+        # Basic error handling, has the downfall that all internal errors in the functions get caught here due to the vague exception clause.
         print(f"An error occured: {e}.")
-        print("Arguments: python csv2sql.py SOURCE_FILENAME TABLE_NAME OUTPUT_FILENAME")
+        print("Arguments: python csv2sql.py.old SOURCE_FILENAME TABLE_NAME OUTPUT_FILENAME")
 
