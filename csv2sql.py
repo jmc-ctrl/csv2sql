@@ -1,6 +1,6 @@
 import sys # For arguments
 import re
-from dataclasses import replace
+from dateutil import parser
 
 
 def load_data(file_name):
@@ -62,6 +62,24 @@ def fix_int_float(dataset):
         outside_index_counter += 1
     return dataset # Returns cleaned data.
 
+def fix_dates(dataset):
+    def convert_non_iso_dates(text):
+        def convert_match(match):
+            try:
+                date_obj = parser.parse(match.group(0))
+                return date_obj.strftime('%Y-%m-%d')
+            except ValueError:
+                return match.group(0)
+
+        pattern = re.compile(r'\b(\d{1,2}[/-]\d{1,2}[/-]\d{4}|\d{1,2} [A-Za-z]{3} \d{4})\b')
+        converted_text = pattern.sub(convert_match, text)
+        return converted_text
+    index_num = 0
+    for lines in dataset:
+        dataset[index_num] = convert_non_iso_dates(lines)
+        index_num += 1
+    return dataset
+
 #final_array = fix_int_float(generate_insert("test",head,data))
 def print_to_file(filename,final_data):
     with open(filename,"w") as file:
@@ -79,10 +97,10 @@ if __name__ == "__main__":
     """Uses sys.argv arguments to build an insert statement."""
     try:
         head, data = load_data(sys.argv[1])
-        final_array = generate_insert(sys.argv[2],head,data)
+        inserted_array = generate_insert(sys.argv[2],head,data)
+        final_array = fix_dates(inserted_array)
         print_to_file(sys.argv[3],final_array)
     except Exception as e:
         print(f"An error occured: {e}.")
         print("Arguments: python csv2sql.py SOURCE_FILENAME TABLE_NAME OUTPUT_FILENAME")
-
 
