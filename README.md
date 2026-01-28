@@ -8,5 +8,5 @@ python3 csv2sql.py SOURCE_FILENAME TABLE_NAME OUTPUT_FILENAME
 
 ### TODO
 - Add error handling for invalid arguments.
-- Make option to format sql file as seperate lines, not one big long line.
+- Fix function to convert string to int and float, or else everything is a varchar except dates.
 - Unit testing (it might not work correctly or at all 😈)
