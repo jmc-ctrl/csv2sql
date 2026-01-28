@@ -1,6 +1,5 @@
 import sys # For arguments
-import re
-from dataclasses import replace
+import re # Regex
 
 
 def load_data(file_name):
@@ -84,6 +83,24 @@ def fix_int_float(dataset):
             index_counter += 1
         outside_index_counter += 1
     return dataset # Returns cleaned data.
-final_array = fix_int_float(generate_insert("test",head,data))
+
+#final_array = fix_int_float(generate_insert("test",head,data))
+def print_to_file(filename,final_data):
+    with open(filename,"w") as file:
+        for tuples in final_data:
+            if tuples == final_data[0]: # For printing headers only.
+                file.write(tuples)
+                file.write("\n")
+            elif tuples == final_data[-1]:
+                file.write(tuples+";")
+            else:
+                file.write(tuples+",")
+                file.write("\n")
+
+    pass
+final_array = generate_insert("test",head,data)
+print_to_file("test_output.sql",final_array)
+
+
 
 pass
