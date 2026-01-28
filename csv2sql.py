@@ -1,62 +1,88 @@
-### Reads .csv file and converts to single SQL insert statement.
-
 import sys # For arguments
+import re
+from dataclasses import replace
 
-def open_file(file_name):
-    """Opens file, stores whole file in variable.
-    Either returns the data from the file, or None if invalid filename."""
+
+def load_data(file_name):
+    """Opens file, stores whole file in variable, along with seperate variable for headers.
+    Either returns the data from the file, or None if invalid filename.
+    headers is a string of the headers.
+    cleaned_data is 2D array, with each internal array being an array of the values that are to be appended to the sql."""
     file_data = []
     with open(file_name,"r") as file:
         for rows in file:
             file_data.append(rows.strip()) # Iterating through each row and appending it to the list.
-        return file_data # Returns data and closes file due to with.
-    return None # None is returned for an invalid file type.
-
-def preprocess_data(data):
-    """Splits data into 2D array, index 0 is headers, index 1 is the data for inserts."""
-    headers = data[0]
-    actual_data = data[1:] # All things in list > index 0.
-
-    return [[headers],[actual_data]]
-
-def write_sql_file(output_filename,data):
-    """Writes the output file. Arguments are filename and the cleaned data."""
-    with open(output_filename,"w") as output:
-        output.writelines(data) # Dumps all data to the file.
-
-class InsertStatement:
-    """Class to store structure and build the insert statement."""
-    def __init__(self, table_name, entities, data):
-        self.table_name = table_name
-        self.entities = entities
-        self.data = data
-        self.modified_data = [] # Has to be here to work.
-        self.format_values()
     
-    def format_values(self):
-        """Formats values to be in (thing1,thing2...),(thing1,thing2...),(thing1,thing2...), etc format for insert."""
-        modified_data = []
-        for i, items in enumerate(self.data): # Switched to enumerated list.
-            if i == len(self.data) - 1:  # Last item can't have ,
-                modified_data.append(f"({items})")
+    headers = file_data[0]
+    file_data.remove(file_data[0])
+
+    cleaned_data = []
+    for entry in file_data:
+        cleaned_data.append(entry.split(","))
+    return headers, cleaned_data
+
+def generate_insert(table,headers,data):
+    '''columns_string = str
+    headers = headers.split(",")
+    for column in headers:
+        columns_string = column
+        if not column == headers[-1]:
+            columns_string = columns_string,","'''
+    columns_string = str(headers)
+    final_array = []
+    beginning_string = (f"INSERT INTO {table} ({columns_string}) VALUES")
+    final_array.append(beginning_string)
+    values_to_insert = []
+    for items in data:
+        values_to_insert.append(str(items))
+    for items in values_to_insert:
+        items = items.strip("[]")
+        '''print(f"({str(items)})", end ="")
+        print(",")'''
+        final_array.append(f"({str(items)})")
+    return final_array
+
+def fix_int_float(dataset):
+    """Finds potential ints and float datatypes in the insert statement, and changes it from '10' to 10, or '6.7777' to 6.7777 to make sure it'll work right with the schema."""
+    int_pattern = re.compile(r'^-?\d+$')
+    float_pattern = re.compile(r'^-?\d+\.\d+$')
+
+    outside_index_counter = 0
+    for insert_line in dataset:
+        index_counter = 0
+        for value in insert_line:
+            value = value.split(",")
+            if re.match(int_pattern,value[index_counter]):
+                replace_value = int(value)
+                dataset[outside_index_counter][index_counter] = replace_value
+            elif re.match(float_pattern,value[index_counter]):
+                replace_value = float(value)
+                dataset[outside_index_counter][index_counter] = replace_value
+            index_counter += 1
+        outside_index_counter += 1
+    return dataset # Returns cleaned data.
+
+#final_array = fix_int_float(generate_insert("test",head,data))
+def print_to_file(filename,final_data):
+    with open(filename,"w") as file:
+        for tuples in final_data:
+            if tuples == final_data[0]: # For printing headers only.
+                file.write(tuples)
+                file.write("\n")
+            elif tuples == final_data[-1]:
+                file.write(tuples+";")
             else:
-                modified_data.append(f"({items}),") 
-        
-        self.modified_data = modified_data  # Stored as instance variable part of class.
-    
-    def create_statement(self):
-        """Join all formatted data elements"""
-        values = ''.join(self.modified_data) # Variable to store inserts. Also changed to '' as per SQL syntax instead of "".
-        statement = f"INSERT INTO {self.table_name} {self.entities} VALUES {values};" # Final sql statement.
-        return statement
-
+                file.write(tuples+",")
+                file.write("\n")
 
 if __name__ == "__main__":
     """Uses sys.argv arguments to build an insert statement."""
     try:
-        raw_data = preprocess_data(open_file(str(sys.argv[1])))
-        statement_data = InsertStatement(str(sys.argv[2]),raw_data[0],raw_data[1])
-        write_sql_file(str(sys.argv[3]),statement_data.create_statement())
+        head, data = load_data(sys.argv[1])
+        final_array = generate_insert(sys.argv[2],head,data)
+        print_to_file(sys.argv[3],final_array)
     except Exception as e:
         print(f"An error occured: {e}.")
         print("Arguments: python csv2sql.py SOURCE_FILENAME TABLE_NAME OUTPUT_FILENAME")
+
+
