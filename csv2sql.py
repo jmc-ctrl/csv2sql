@@ -50,15 +50,26 @@ def fix_int_float(dataset):
     outside_index_counter = 0
     for insert_line in dataset:
         index_counter = 0
+        insert_line = insert_line.split(",")
         for value in insert_line:
-            value = value.split(",")
-            if re.match(int_pattern,value[index_counter]):
-                replace_value = int(value)
-                dataset[outside_index_counter][index_counter] = replace_value
-            elif re.match(float_pattern,value[index_counter]):
-                replace_value = float(value)
-                dataset[outside_index_counter][index_counter] = replace_value
-            index_counter += 1
+                if index_counter > len(insert_line):
+                    value = value.split()
+                    if re.match(float_pattern,value[index_counter]):
+                        try:
+                            replace_value = float(value)
+                            dataset[outside_index_counter][index_counter] = replace_value
+                        except TypeError:
+                            continue # Preventing error on date.
+                    elif re.match(int_pattern,value[index_counter]):
+                        try:
+                            replace_value = int(value)
+                            dataset[outside_index_counter][index_counter] = replace_value
+                        except TypeError:
+                            continue # Preventing error on date.
+
+                    index_counter += 1
+                else:
+                    break
         outside_index_counter += 1
     return dataset # Returns cleaned data.
 
@@ -98,7 +109,8 @@ if __name__ == "__main__":
     try:
         head, data = load_data(sys.argv[1])
         inserted_array = generate_insert(sys.argv[2],head,data)
-        final_array = fix_dates(inserted_array)
+        fixed_int_float_array = fix_int_float(inserted_array)
+        final_array = fix_dates(fixed_int_float_array)
         print_to_file(sys.argv[3],final_array)
     except Exception as e:
         print(f"An error occured: {e}.")
