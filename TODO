@@ -1,3 +1,2 @@
 - Fix the fix_int_float() function.
-- Add function to change dates to YYYY-MM-DD format as required by MySQL, SQLServer etc
 - Documentation
